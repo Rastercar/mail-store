@@ -1,0 +1,24 @@
+# The default microservice configuration, security credentials should be
+# set with enviroment variables, every key on this config has a env var
+# equivalent that sets or overrides the config on this file.
+#
+# Commented properties on this file are sensitive and should be set only
+# by the their env var equivalent, in development they can be hardcoded
+# within the config.dev.yml file
+
+app:
+  debug: false                                   # APP_DEBUG
+
+db:
+  # url:                                         # DB_URL
+
+rmq:
+  # url:                                         # RMQ_URL
+  queue: "mail_store"                            # RMQ_QUEUE
+  rpc_timeout: 10                                # RMQ_RPC_TIMEOUT
+  reconnect_wait_time: 5                         # RMQ_RECONNECT_WAIT_TIME
+  mailer_service_queue: "mail_requests"
+
+tracer:
+  url: "http://localhost:14268/api/traces"       # TRACER_URL
+  service_name: "mail_store"                     # TRACER_SERVICE_NAME
