@@ -31,10 +31,18 @@ func (m *Mailer) SendEmail(ctx context.Context, email dtos.SendEmailDto, uuid st
 
 	recipientChunks := arrays.ToChunks(arrays.RemoveDuplicates(email.To), maxSesRecipients)
 
-	for _, recipientChunk := range recipientChunks {
-		email.To = recipientChunk
+	mailerServiceDto := MailerServiceSendEmailDto{
+		Uuid:             uuid,
+		ReplyToAddresses: email.ReplyToAddresses,
+		SubjectText:      email.SubjectText,
+		BodyHtml:         email.BodyHtml,
+		BodyText:         email.BodyText,
+	}
 
-		body, err := json.Marshal(email)
+	for _, recipientChunk := range recipientChunks {
+		mailerServiceDto.To = recipientChunk
+
+		body, err := json.Marshal(mailerServiceDto)
 		if err != nil {
 			tracer.AddSpanErrorAndFail(span, err, "failed to marshal mail request for mailer service")
 
