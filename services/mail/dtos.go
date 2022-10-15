@@ -1,5 +1,7 @@
 package mail
 
+import "time"
+
 // The dto expected by the mailer service for sender operations
 type MailerServiceSendEmailDto struct {
 	Uuid string `json:"uuid"`
@@ -33,7 +35,8 @@ type MailerServiceSendEmailDto struct {
 	BodyHtml string `json:"body_html"`
 }
 
-type SendEmailRes struct {
-	Success bool   `json:"success"` //
-	Message string `json:"message"` // Generic message describring the success or error
+type MailerServiceSendEmailRes struct {
+	Success   bool      `json:"success"`   //
+	Message   string    `json:"message"`   // Generic message describring the success or error
+	Timestamp time.Time `json:"timestamp"` // When the email failed or was successfully queued
 }

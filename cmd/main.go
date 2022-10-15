@@ -46,7 +46,7 @@ func main() {
 	repo := repository.New(db.New(cfg.Db.Url, cfg.App.Debug))
 
 	queue := queue.New(cfg.Rmq)
-	mailer := mail.New(cfg, queue)
+	mailer := mail.New(cfg, queue, repo)
 
 	queue.DeliveryRouter = controller.NewRouter(queue, mailer, repo, validator.New())
 

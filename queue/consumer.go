@@ -8,8 +8,17 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func (s *Server) startConsumer() {
+func (s *Server) consumeDeliveries() {
 	for d := range s.deliveries {
+		go s.ServeDelivery(&d)
+	}
+}
+
+func (s *Server) consumeMailResponses() {
+	for d := range s.mailRequestResponses {
+		d.Type = "__internal:mail-feeback__"
+		d.ReplyTo = "" // assure the server wont send a response
+
 		go s.ServeDelivery(&d)
 	}
 }
@@ -24,7 +33,9 @@ func (s *Server) startConsumer() {
 // body *might* contain additional data about the error, otherwise the body is the
 // success case response.
 func (s *Server) ServeDelivery(d *amqp.Delivery) {
-	ctx, span := tracer.NewSpan(context.Background(), "amqp", fmt.Sprintf("AMQP - %s", d.Type))
+	ctx := tracer.ExtractAMPQHeaders(context.Background(), d.Headers)
+
+	ctx, span := tracer.NewSpan(ctx, "amqp", fmt.Sprintf("AMQP - %s", d.Type))
 	defer span.End()
 
 	callHandler, routerHasCallHandler := s.DeliveryRouter[d.Type]

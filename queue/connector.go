@@ -59,29 +59,24 @@ func (s *Server) connect() {
 			continue
 		}
 
-		_, err = channel.QueueDeclare(
-			s.cfg.Queue, // name
-			true,        // durable
-			false,       // autodelete
-			false,       // exclusive
-			false,       // nowait
-			nil,         // args
-		)
+		_, err = channel.QueueDeclare(s.cfg.Queue, true, false, false, false, nil)
 		if err != nil {
-			log.Fatalf("[ RMQ ] failed to declare exchange: %v ", err)
+			log.Fatalf("[ RMQ ] failed to declare queue %s: %v", s.cfg.Queue, err)
 		}
 
-		s.deliveries, err = channel.Consume(
-			s.cfg.Queue, // queue
-			"",          // consumer
-			false,       // autoack
-			false,       // exclusive
-			false,       // nolocal
-			false,       // nowait
-			nil,         // args
-		)
+		s.deliveries, err = channel.Consume(s.cfg.Queue, "", false, false, false, false, nil)
 		if err != nil {
-			log.Fatalf("[ RMQ ] failed to consume mail requests queue: %v ", err)
+			log.Fatalf("[ RMQ ] failed to consume queue %s: %v", s.cfg.Queue, err)
+		}
+
+		_, err = channel.QueueDeclare(s.cfg.MailerServiceResponseQueue, true, false, false, false, nil)
+		if err != nil {
+			log.Fatalf("[ RMQ ] failed to declare queue %s: %v", s.cfg.MailerServiceResponseQueue, err)
+		}
+
+		s.mailRequestResponses, err = channel.Consume(s.cfg.MailerServiceResponseQueue, "", false, false, false, false, nil)
+		if err != nil {
+			log.Fatalf("[ RMQ ] failed to consume queue %s: %v", s.cfg.MailerServiceResponseQueue, err)
 		}
 
 		s.conn = con
@@ -90,7 +85,8 @@ func (s *Server) connect() {
 		s.notifyClose = make(chan *amqp.Error, 1024)
 		s.channel.NotifyClose(s.notifyClose)
 
-		s.startConsumer()
+		go s.consumeDeliveries()
+		go s.consumeMailResponses()
 
 		log.Printf("[ RMQ ] connected")
 		return

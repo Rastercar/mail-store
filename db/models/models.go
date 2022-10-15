@@ -1,6 +1,8 @@
 package models
 
 import (
+	"database/sql"
+
 	"github.com/lib/pq"
 )
 
@@ -29,9 +31,11 @@ func (MailRequest) TableName() string {
 // feedback regarding one of possibly many mail sending operations
 // needed to send the email to all recipients of a mail sending request
 type MailRequestFeedback struct {
-	Id            int            `json:"id" gorm:"primaryKey"`          // the email sent by the operation
-	Recipients    pq.StringArray `json:"recipients" gorm:"type:text[]"` // all the recipients the email was sent to in this op
-	Success       bool           `json:"success"`                       // if the operation was a success, null means no response has been recieved
+	Id            int            `json:"id" gorm:"primaryKey"`                  // the email sent by the operation
+	Uuid          string         `json:"uuid" gorm:"type:uuid;not null;unique"` // uuid of the operation, NOT of the mail request
+	Recipients    pq.StringArray `json:"recipients" gorm:"type:text[]"`         // all the recipients the email was sent to in this op
+	Success       *bool          `json:"success"`                               // if the operation was a success, null means no response has been recieved
+	QueuedAt      sql.NullTime   `json:"queued_at"`                             // when the email was successfully queued, null if operation failed or hasnt ended
 	MailRequestId int            `json:"mail_request_id"`
 	MailRequest   MailRequest    `gorm:"foreignKey:MailRequestId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

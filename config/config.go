@@ -20,11 +20,12 @@ type TracerConfig struct {
 }
 
 type RmqConfig struct {
-	Url                string `env-required:"true" yaml:"url" env:"RMQ_URL"`
-	Queue              string `env-required:"true" yaml:"queue" env:"RMQ_QUEUE"`
-	RpcTimeout         int    `env-required:"true" yaml:"rpc_timeout" env:"RMQ_RPC_TIMEOUT"`
-	ReconnectWaitTime  int    `env-required:"true" yaml:"reconnect_wait_time" env:"RMQ_RECONNECT_WAIT_TIME"`
-	MailerServiceQueue string `env-required:"true" yaml:"mailer_service_queue" env:"RMQ_MAILER_SERVICE_QUEUE"`
+	Url                        string `env-required:"true" yaml:"url" env:"RMQ_URL"`
+	Queue                      string `env-required:"true" yaml:"queue" env:"RMQ_QUEUE"`
+	RpcTimeout                 int    `env-required:"true" yaml:"rpc_timeout" env:"RMQ_RPC_TIMEOUT"`
+	ReconnectWaitTime          int    `env-required:"true" yaml:"reconnect_wait_time" env:"RMQ_RECONNECT_WAIT_TIME"`
+	MailerServiceQueue         string `env-required:"true" yaml:"mailer_service_queue" env:"RMQ_MAILER_SERVICE_QUEUE"`
+	MailerServiceResponseQueue string `env-required:"true" yaml:"mailer_service_response_queue" env:"RMQ_MAILER_SERVICE_RESPONSE_QUEUE"`
 }
 
 type Config struct {

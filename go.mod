@@ -14,6 +14,7 @@ require (
 	go.opentelemetry.io/otel/exporters/jaeger v1.11.0
 	go.opentelemetry.io/otel/sdk v1.11.0
 	go.opentelemetry.io/otel/trace v1.11.0
+	golang.org/x/exp v0.0.0-20221012211006-4de253d81b95
 	gorm.io/driver/postgres v1.4.4
 	gorm.io/gorm v1.24.0
 )

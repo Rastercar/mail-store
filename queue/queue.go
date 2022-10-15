@@ -8,6 +8,7 @@ import (
 	"mail-store-ms/tracer"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"golang.org/x/exp/maps"
 )
 
 //go:generate mockgen -destination=../mocks/amqp.go -package=mocks github.com/rabbitmq/amqp091-go Acknowledger
@@ -25,12 +26,13 @@ type Server struct {
 	interfaces.Connector
 	interfaces.Publisher
 
-	cfg            config.RmqConfig
-	conn           interfaces.AmqpConnection
-	channel        interfaces.AmqpChannel
-	deliveries     <-chan amqp.Delivery
-	notifyClose    chan *amqp.Error
-	DeliveryRouter RpcRouter
+	cfg                  config.RmqConfig
+	conn                 interfaces.AmqpConnection
+	channel              interfaces.AmqpChannel
+	deliveries           <-chan amqp.Delivery
+	mailRequestResponses <-chan amqp.Delivery
+	notifyClose          chan *amqp.Error
+	DeliveryRouter       RpcRouter
 }
 
 func New(cfg config.RmqConfig) *Server {
@@ -75,6 +77,13 @@ func (s *Server) Stop() error {
 func (s *Server) Publish(ctx context.Context, exchange, key string, publishing amqp.Publishing) error {
 	ctx, span := tracer.NewSpan(ctx, "queue", "Publish")
 	defer span.End()
+
+	tracerHeaders := tracer.InjectAMQPHeaders(ctx)
+	if publishing.Headers != nil {
+		maps.Copy(publishing.Headers, tracerHeaders)
+	} else {
+		publishing.Headers = tracerHeaders
+	}
 
 	err := s.Publisher.PublishWithContext(ctx, s.channel, exchange, key, publishing)
 
